@@ -16,10 +16,10 @@
 /********BASIC SETTINGS********/
 
 // the data pin for the NeoPixels
-#define DATA_PIN 6
+#define DATA_PIN 11
 
 // How many NeoPixels we will be using, charge accordingly
-#define NUM_LEDS 60
+#define NUM_LEDS 36
 
 //The variation in yellow color to create the fire effect, define the interval where the color can change.
 #define MIN_VARIATION 0
@@ -31,8 +31,10 @@
 #define MAX_INTENSITY 1.0
 
 //Speed for variations, higher is slower
-#define NOISE_SPEED_COLOR 5
-#define NOISE_SPEED_INTENSITY 3
+#define NOISE_SPEED_COLOR 1
+#define NOISE_SPEED_INTENSITY 1
+
+#define NUM_SCHEMES 8
 
 /******************CODE*****************/
 /**************DO NOT TOUCH*************/
@@ -42,17 +44,32 @@ double n;
 double ni;
 
 const byte RED = 255;
+const int buttonPin = 2;
+
+int scheme = 0;
+
+int buttonState = 0;
+int oldButtonState = 0;
 
 CRGB leds[NUM_LEDS];
 
 void setup() {
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
-  //strip.setBrightness(60);
-  //Serial.begin(9600);
-
+  pinMode(buttonPin, INPUT);
 }
 
 void loop() {
+  buttonState = digitalRead(buttonPin);
+
+  if (buttonState != oldButtonState) { //button changed
+    if (buttonState == HIGH) { // pressed
+      scheme++;
+      scheme %= NUM_SCHEMES;
+    } else { // released
+    
+    }
+  }
+  oldButtonState = buttonState;
   renderLEDs();
 }
 
@@ -80,7 +97,32 @@ void renderLEDs() {
     float red = vi *(RED*v);
     float yellow = vi *((MAX_VARIATION - MIN_VARIATION)*v + MIN_VARIATION);
 
-    leds[i] = CRGB(red , yellow , 0);
+    switch(scheme) {
+      case 0:
+        leds[i] = CRGB(red , yellow , 0);
+        break;
+      case 1:
+        leds[i] = CRGB(0, red , yellow);
+        break;
+      case 2:
+        leds[i] = CRGB(yellow , 0, red);
+        break;
+      case 3:
+        leds[i] = CRGB(red , yellow , red);
+        break;
+      case 4:
+        leds[i] = CRGB(yellow, red , red);
+        break;
+      case 5:
+        leds[i] = CRGB(red , red, yellow);
+        break;
+      case 6:
+        leds[i] = CRGB(red , red, red);
+        break;
+      case 7:
+        leds[i] = CRGB(0, 0, 0);
+        break;
+    }
   }
   FastLED.show();
 
